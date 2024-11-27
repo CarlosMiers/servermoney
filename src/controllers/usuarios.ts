@@ -66,7 +66,13 @@ export const loginUser = async (req: Request, res: Response) => {
     const token = jwt.sign({
         loginacceso:loginacceso
     },process.env.SECRET_KEY || '85OYVb@2mUw1')
-
+   
     res.json(token);
+
+
+
+    
+
+
 
 }    

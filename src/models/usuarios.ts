@@ -7,6 +7,10 @@ export const UserModel = sequelize.define('gestor_usuario',{
         primaryKey : true,
         autoIncrement: true
     },
+    descripcion:{
+        type: DataTypes.STRING,
+    },
+
     loginacceso:{
         type: DataTypes.STRING,
     },

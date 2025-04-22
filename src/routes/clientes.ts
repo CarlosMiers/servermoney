@@ -8,6 +8,6 @@ router.put('/id',validateToken,UpdateClientes);
 router.post('/id',validateToken,getIdCliente);
 router.post('/',validateToken, NewCliente);
 router.get('/',validateToken, getTodosPaginado);
-//router.get('/',validateToken, getTodos);
+router.get('/',validateToken, getTodos);
 
 export default router;

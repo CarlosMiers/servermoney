@@ -5,7 +5,7 @@ import validateToken from './validate-token';
 const router = Router();
 
 router.post('/', validateToken,create);
-router.put('/id', validateToken,update);
+router.put('/:id', validateToken, update);
 router.get('/id/:id', validateToken,getByNumero);
 router.get('/',validateToken,getListadoPreventa);
 

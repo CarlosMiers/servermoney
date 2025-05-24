@@ -42,8 +42,12 @@ export const create = async (req: Request, res: Response) => {
 
 // Actualizar una preventa y sus detalles
 export const update = async (req: Request, res: Response) => {
+
+  const { id } = req.params;
+  const numero = parseFloat(id);
+  console.log("número:", numero);
+
   const {
-    numeroPreventa,
     fecha,
     comprobante,
     cliente,
@@ -55,7 +59,7 @@ export const update = async (req: Request, res: Response) => {
   try {
     // Buscar la preventa existente por su número
     const preventa = await PreventaModel.findOne({
-      where: { numero: numeroPreventa },
+      where: { numero: id },
     });
 
     if (!preventa) {
@@ -74,15 +78,15 @@ export const update = async (req: Request, res: Response) => {
 
     // Eliminar los detalles existentes y agregar los nuevos detalles
     await DetallePreventaModel.destroy({
-      where: { iddetalle: preventa.numero }, // Eliminar detalles que corresponden a esta preventa
+      where: { iddetalle: id }, // Eliminar detalles que corresponden a esta preventa
     });
 
     // Crear nuevos detalles
     const detallesConNumero = detalles.map((detalle: any) => ({
-      iddetalle: preventa.numero,
+      iddetalle: id,
       codprod: detalle.codprod,
       cantidad: detalle.cantidad,
-      prcosto: parseFloat(detalle.costo), // Convertir a número decimal
+      prcosto: 0, // Convertir a número decimal
       precio: parseFloat(detalle.precio), // Convertir a número decimal
       monto: parseFloat(detalle.precio) * parseInt(detalle.cantidad), // Asumir que 'monto' es precio * cantidad
       impiva: Math.round(

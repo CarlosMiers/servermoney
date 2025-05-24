@@ -97,14 +97,16 @@ export const getTodosPaginado = async (req: Request, res: Response) => {
 
 export const getTodos = async (req: Request, res: Response) => {
   try {
+    const clientes = await ClienteModel.findAll({
+      where: { estado: 1 },
+      attributes: ['codigo', 'nombre', 'direccion', 'ruc']
+    });
 
-    const clientes = await ClienteModel.findAll({});
     res.json(clientes);
   } catch (err) {
     res.status(500).json({ error: "NO SE PUDO CONECTAR" });
   }
 }
-
 export const UpdateClientes = async (req: Request, res: Response) => {
   const codigo = req.body.codigo;
   try {

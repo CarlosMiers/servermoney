@@ -6,7 +6,7 @@ const router = Router();
 
 router.post('/', validateToken,create);
 router.put('/id', validateToken,update);
-router.get('/id', validateToken,getByNumero);
+router.get('/id/:id', validateToken,getByNumero);
 router.get('/',validateToken,getListadoPreventa);
 
 export default router;

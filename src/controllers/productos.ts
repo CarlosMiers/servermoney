@@ -40,8 +40,6 @@ export const getIdProducto = async (req: Request, res: Response) => {
   res.json(producto);
 }
 
-
-
 export const getTodosPaginado = async (req: Request, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
@@ -53,7 +51,6 @@ export const getTodosPaginado = async (req: Request, res: Response) => {
       limit: limit,
     });
 
-    console.log("PRODUCTOS "+producto);
     res.json(producto);
    
   } catch (err) {
@@ -64,8 +61,11 @@ export const getTodosPaginado = async (req: Request, res: Response) => {
 
 export const getTodos = async (req: Request, res: Response) => {
   try {
-
-    const producto = await ProductosModel.findAll({});
+    const producto = await ProductosModel.findAll({
+      where: {
+        estado: 1,
+      },
+    });
     res.json(producto);
   } catch (err) {
     res.status(500).json({ error: "NO SE PUDO CONECTAR" });

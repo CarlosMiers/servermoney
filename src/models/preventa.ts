@@ -2,6 +2,7 @@
 import { Model, DataTypes, Optional } from "sequelize";
 import sequelize from "../db/connection";
 import { DetallePreventaModel } from "../models/detalle_preventa";
+import { ClienteModel } from "./clientes";
 
 // Definir la clase PreventaModel extendiendo de Model
 export class PreventaModel extends Model {
@@ -10,13 +11,19 @@ export class PreventaModel extends Model {
   public comprobante!: number;
   public cliente!: number; // FK a Clientes
   public totalneto!: number;
-  public codusuario!: number; // Nuevo campo para almacenar el código de usuario
+  public codusuario!: number;
+
   public detalles!: (typeof DetallePreventaModel)[];
+
+  // ✅ Tipado fuerte para la relación con Cliente
+  public cliente_info?: {
+    codigo: number;
+    nombrecliente: string;
+  };
 }
 
-interface PreventaCreationAttributes extends Optional<PreventaModel, 'numero'> {}
+interface PreventaCreationAttributes extends Optional<PreventaModel, "numero"> {}
 
-// Inicialización del modelo Preventa
 PreventaModel.init(
   {
     numero: {
@@ -34,7 +41,7 @@ PreventaModel.init(
     },
     cliente: {
       type: DataTypes.INTEGER,
-      allowNull: false, // FK a Clientes
+      allowNull: false,
     },
     totalneto: {
       type: DataTypes.DECIMAL(10, 2),
@@ -42,27 +49,40 @@ PreventaModel.init(
     },
     codusuario: {
       type: DataTypes.INTEGER,
-      allowNull: false, // Nuevo campo codusuario para almacenar el código del usuario
+      allowNull: false,
     },
   },
   {
     sequelize,
     modelName: "preventa",
     tableName: "preventa",
-    timestamps: false, // Si no estás usando timestamps
+    timestamps: false,
   }
 );
 
-// Relación de Preventa con Cliente
-
+// Relaciones
 PreventaModel.hasMany(DetallePreventaModel, {
-  foreignKey: "iddetalle", // <- este es el campo en detalle_preventa que apunta a preventa.numero
-  sourceKey: "numero",     // <- campo en preventa que se enlaza
+  foreignKey: "iddetalle",
+  sourceKey: "numero",
   as: "detalles",
 });
 
 DetallePreventaModel.belongsTo(PreventaModel, {
-  foreignKey: "iddetalle", // <- este es el campo en detalle_preventa
-  targetKey: "numero",     // <- campo en preventa que se enlaza
+  foreignKey: "iddetalle",
+  targetKey: "numero",
   as: "preventa",
 });
+
+PreventaModel.belongsTo(ClienteModel, {
+  foreignKey: "cliente",
+  targetKey: "codigo",
+  as: "cliente_info",
+});
+
+ClienteModel.hasMany(PreventaModel, {
+  foreignKey: "cliente",
+  sourceKey: "codigo",
+  as: "preventas",
+});
+
+

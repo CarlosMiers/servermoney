@@ -4,6 +4,7 @@ import { DetallePreventaModel } from "../models/detalle_preventa";
 import { QueryTypes } from "sequelize";
 import sequelize from "../db/connection";
 import { ProductosModel } from "../models/productos";
+import { ClienteModel } from "../models/clientes";
 
 // Crear una nueva preventa con detalles
 export const create = async (req: Request, res: Response) => {
@@ -42,19 +43,12 @@ export const create = async (req: Request, res: Response) => {
 
 // Actualizar una preventa y sus detalles
 export const update = async (req: Request, res: Response) => {
-
   const { id } = req.params;
   const numero = parseFloat(id);
   console.log("número:", numero);
 
-  const {
-    fecha,
-    comprobante,
-    cliente,
-    totalneto,
-    codusuario,
-    detalles,
-  } = req.body;
+  const { fecha, comprobante, cliente, totalneto, codusuario, detalles } =
+    req.body;
 
   try {
     // Buscar la preventa existente por su número
@@ -111,7 +105,6 @@ export const update = async (req: Request, res: Response) => {
 export const getByNumero = async (req: Request, res: Response) => {
   const { id } = req.params;
   const numero = parseFloat(id);
-  console.log("número:", numero);
 
   try {
     const preventa = await PreventaModel.findOne({
@@ -124,9 +117,14 @@ export const getByNumero = async (req: Request, res: Response) => {
             {
               model: ProductosModel,
               as: "producto",
-              attributes: ["codigo", ["nombre", "descripcion"]], // Especifica solo los campos que necesitas
+              attributes: ["codigo", ["nombre", "descripcion"]],
             },
           ],
+        },
+        {
+          model: ClienteModel,
+          as: "cliente_info",
+          attributes: ["codigo", ["nombre", "nombrecliente"]],
         },
       ],
     });
@@ -135,19 +133,25 @@ export const getByNumero = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Preventa no encontrada" });
     }
 
+    // Serializamos preventa a JSON plano
+    const preventaJson = preventa.toJSON() as any;
+
     res.status(200).json({
-      numero: preventa.numero,
-      fecha: preventa.fecha,
-      comprobante: preventa.comprobante,
-      cliente: preventa.cliente,
-      totalneto: preventa.totalneto,
-      codusuario: preventa.codusuario,
-      detalles: preventa.detalles,
+      numero: preventaJson.numero,
+      fecha: preventaJson.fecha,
+      comprobante: preventaJson.comprobante,
+      cliente: preventaJson.cliente,
+      clientenombre: preventaJson.cliente_info?.nombrecliente || '',
+      totalneto: preventaJson.totalneto,
+      codusuario: preventaJson.codusuario,
+      detalles: preventaJson.detalles,
     });
   } catch (error) {
+    console.error("Error al obtener la preventa:", error);
     res.status(500).json({ message: "Error al obtener la preventa", error });
   }
 };
+
 
 export const getListadoPreventa = async (req: Request, res: Response) => {
   const id = req.query.id;

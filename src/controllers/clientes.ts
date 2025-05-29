@@ -4,7 +4,7 @@ import { ClienteModel } from "../models/clientes";
 export const NewCliente = async (req: Request, res: Response) => {
   try {
     // Extraer la información del cuerpo de la solicitud
-     const clienteData = req.body;
+    const clienteData = req.body;
 
     // Crear un nuevo cliente en la base de datos
     const nuevoCliente = await ClienteModel.create(clienteData);
@@ -25,8 +25,8 @@ export const NewCliente = async (req: Request, res: Response) => {
 
 
 export const getIdCliente = async (req: Request, res: Response) => {
-  const { codigo }  = req.body;
-  
+  const { codigo } = req.body;
+
   const cliente: any = await ClienteModel.findOne({
     where: { codigo: codigo },
   });
@@ -110,27 +110,27 @@ export const getTodos = async (req: Request, res: Response) => {
 export const UpdateClientes = async (req: Request, res: Response) => {
   const codigo = req.body.codigo;
   try {
-      const cliente = await ClienteModel.findByPk(codigo?.toString());
-      if (cliente) {
-          await cliente.update(req.body);
-          res.json({
-              msg: 'El Cliente fue actualizado con éxito'
-          })
+    const cliente = await ClienteModel.findByPk(codigo?.toString());
+    if (cliente) {
+      await cliente.update(req.body);
+      res.json({
+        msg: 'El Cliente fue actualizado con éxito'
+      })
 
-      } else {
-          res.status(404).json({
-              msg: `No existe el cliente con id ${codigo}`
-          })
-      }
+    } else {
+      res.status(404).json({
+        msg: `No existe el cliente con id ${codigo}`
+      })
+    }
 
   } catch (error) {
-      console.log(error);
-      res.json({
-          msg: `Upps ocurrio un error, comuniquese con soporte`
-      })
+    console.log(error);
+    res.json({
+      msg: `Upps ocurrio un error, comuniquese con soporte`
+    })
   }
 
 
-  
+
 
 }

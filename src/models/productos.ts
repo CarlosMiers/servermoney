@@ -1,22 +1,22 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../db/connection";
 
-export const ProductosModel = sequelize.define('productos',{
-    codigo:{
+export const ProductosModel = sequelize.define('productos', {
+    codigo: {
         type: DataTypes.STRING,
-        primaryKey : true,
+        primaryKey: true,
     },
-    nombre:{
+    nombre: {
         type: DataTypes.STRING,
     },
 
-    costo:{
+    costo: {
         type: DataTypes.NUMBER,
     },
-    precio_maximo:{
+    precio_maximo: {
         type: DataTypes.NUMBER,
     },
-    estado:{
+    estado: {
         type: DataTypes.INTEGER,
     }
 

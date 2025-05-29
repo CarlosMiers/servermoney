@@ -1,6 +1,8 @@
 import { Sequelize } from 'sequelize';
-const sequelize = new Sequelize(process.env.DB_DATABASE!, process.env.DB_USER!, process.env.DB_PASSWORD!, {
-  host: process.env.DB_HOST!,
+import config from "../config/varenv";
+
+const sequelize = new Sequelize(config.db.db!, config.db.user!, config.db.pass!, {
+  host: config.db.host!,
   dialect: 'mysql'
 });
 

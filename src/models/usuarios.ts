@@ -1,21 +1,21 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../db/connection";
 
-export const UserModel = sequelize.define('gestor_usuario',{
-    idusuario:{
+export const UserModel = sequelize.define('gestor_usuario', {
+    idusuario: {
         type: DataTypes.INTEGER,
-        primaryKey : true,
+        primaryKey: true,
         autoIncrement: true
     },
-    descripcion:{
+    descripcion: {
         type: DataTypes.STRING,
     },
 
-    loginacceso:{
+    loginacceso: {
         type: DataTypes.STRING,
     },
-    password:{
+    password: {
         type: DataTypes.STRING,
     },
-   
+
 })

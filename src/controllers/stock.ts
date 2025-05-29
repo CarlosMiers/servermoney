@@ -4,7 +4,7 @@ import sequelize from "../db/connection";
 
 export const getStockProducto = async (req: Request, res: Response) => {
     const id = req.query.id;
- 
+
     const stockProd = await sequelize.query("SELECT sucursal,stock,"
         + "stock.producto,sucursales.nombre as nombresucursal "
         + "FROM stock "

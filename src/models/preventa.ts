@@ -22,7 +22,7 @@ export class PreventaModel extends Model {
   };
 }
 
-interface PreventaCreationAttributes extends Optional<PreventaModel, "numero"> {}
+interface PreventaCreationAttributes extends Optional<PreventaModel, "numero"> { }
 
 PreventaModel.init(
   {

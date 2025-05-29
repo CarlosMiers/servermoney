@@ -1,44 +1,44 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../db/connection";
 
-export const ClienteModel = sequelize.define('clientes',{
-    codigo:{
+export const ClienteModel = sequelize.define('clientes', {
+    codigo: {
         type: DataTypes.INTEGER,
-        primaryKey : true,
+        primaryKey: true,
         autoIncrement: true
     },
-    nombre:{
+    nombre: {
         type: DataTypes.STRING,
     },
-    fechanacimiento:{
+    fechanacimiento: {
         type: DataTypes.DATE,
-    },    
-    cedula:{
+    },
+    cedula: {
         type: DataTypes.STRING,
     },
-    ruc:{
+    ruc: {
         type: DataTypes.STRING,
     },
-    direccion:{
-                type: DataTypes.STRING,
+    direccion: {
+        type: DataTypes.STRING,
     },
-    telefono:{
+    telefono: {
         type: DataTypes.STRING,
     },
 
-    latitud:{
+    latitud: {
         type: DataTypes.STRING,
     },
-    longitud:{
+    longitud: {
         type: DataTypes.STRING,
     },
-    mail:{
+    mail: {
         type: DataTypes.STRING,
     },
-    sexo:{
+    sexo: {
         type: DataTypes.INTEGER,
     },
-    estado:{
+    estado: {
         type: DataTypes.INTEGER,
     }
 

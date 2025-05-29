@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import config from "../config/varenv";
 import jwt from 'jsonwebtoken';
 
 const validateToken = (req: Request, res: Response, next: NextFunction) => {
@@ -7,7 +8,7 @@ const validateToken = (req: Request, res: Response, next: NextFunction) => {
     if (headerToken != undefined && headerToken.startsWith('Bearer')) {
         try {
             const bearerToken = headerToken.slice(7);
-            jwt.verify(bearerToken, process.env.SECRET_KEY || '85OYVb@2mUw1')
+            jwt.verify(bearerToken, config.secretkey)
             next()
         } catch (error) {
             res.status(401).json({

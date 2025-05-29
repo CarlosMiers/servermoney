@@ -5,7 +5,7 @@ import { ProductosModel } from "../models/productos";
 export const NewProducto = async (req: Request, res: Response) => {
   try {
     // Extraer la información del cuerpo de la solicitud
-     const productoData = req.body;
+    const productoData = req.body;
 
     // Crear un nuevo producto en la base de datos
     const nuevoProducto = await ProductosModel.create(productoData);
@@ -26,8 +26,8 @@ export const NewProducto = async (req: Request, res: Response) => {
 
 
 export const getIdProducto = async (req: Request, res: Response) => {
-  const { codigo }  = req.body;
-  
+  const { codigo } = req.body;
+
   const producto: any = await ProductosModel.findOne({
     where: { codigo: codigo },
   });
@@ -52,7 +52,7 @@ export const getTodosPaginado = async (req: Request, res: Response) => {
     });
 
     res.json(producto);
-   
+
   } catch (err) {
     res.status(500).json({ error: "NO SE PUDO CONECTAR" });
   }
@@ -75,23 +75,23 @@ export const getTodos = async (req: Request, res: Response) => {
 export const UpdateProductos = async (req: Request, res: Response) => {
   const codigo = req.body.codigo;
   try {
-      const producto = await ProductosModel.findByPk(codigo?.toString());
-      if (producto) {
-          await producto.update(req.body);
-          res.json({
-              msg: 'El Producto fue actualizado con éxito'
-          })
+    const producto = await ProductosModel.findByPk(codigo?.toString());
+    if (producto) {
+      await producto.update(req.body);
+      res.json({
+        msg: 'El Producto fue actualizado con éxito'
+      })
 
-      } else {
-          res.status(404).json({
-              msg: `No existe el producto con id ${codigo}`
-          })
-      }
+    } else {
+      res.status(404).json({
+        msg: `No existe el producto con id ${codigo}`
+      })
+    }
 
   } catch (error) {
-      console.log(error);
-      res.json({
-          msg: `Upps ocurrio un error, comuniquese con soporte`
-      })
+    console.log(error);
+    res.json({
+      msg: `Upps ocurrio un error, comuniquese con soporte`
+    })
   }
 }

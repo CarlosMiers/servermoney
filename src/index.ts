@@ -1,10 +1,6 @@
-import dotenv from 'dotenv';
-import Server from "./models/server";
+import app from './app';
+import config from "./config/varenv";
 
-//configuramos dotenv
-
-dotenv.config();
-
-//se instancia la clase server
-const server = new Server();
-server.listen();
+app.listen(config.port, () => {
+  console.log(`Servidor corriendo: http://localhost:${config.port}`);
+});

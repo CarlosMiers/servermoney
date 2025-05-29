@@ -1,4 +1,5 @@
-import { Request, Response } from "express"
+import { Request, Response } from "express";
+import config from "../config/varenv";
 import { UserModel } from '../models/usuarios';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -42,7 +43,7 @@ export const newUser = async (req: Request, res: Response) => {
 
 export const loginUser = async (req: Request, res: Response) => {
 
-    const { loginacceso,password} = req.body;
+    const { loginacceso, password } = req.body;
 
     //validamos si el usuario existe en la base de datos
     const login: any = await UserModel.findOne({ where: { loginacceso: loginacceso } });
@@ -64,9 +65,8 @@ export const loginUser = async (req: Request, res: Response) => {
     //generamos el token
 
     const token = jwt.sign({
-        loginacceso:loginacceso
-    },process.env.SECRET_KEY || '85OYVb@2mUw1')
-       res.json(token);
-
+        loginacceso: loginacceso
+    }, config.secretkey)
+    res.json(token);
 
 }    

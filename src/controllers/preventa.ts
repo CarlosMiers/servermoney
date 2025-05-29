@@ -161,12 +161,12 @@ export const getListadoPreventa = async (req: Request, res: Response) => {
   try {
     const listapreventa = await sequelize.query(
       "SELECT numero, fecha, c.nombre AS nombrecliente, totalneto " +
-        "FROM preventa p " +
-        " LEFT JOIN clientes c " +
-        " ON c.codigo = p.cliente " +
-        " WHERE p.codusuario = ? " +
-        " AND p.fecha BETWEEN ? AND ? " +
-        " ORDER BY numero",
+      "FROM preventa p " +
+      " LEFT JOIN clientes c " +
+      " ON c.codigo = p.cliente " +
+      " WHERE p.codusuario = ? " +
+      " AND p.fecha BETWEEN ? AND ? " +
+      " ORDER BY numero",
       { replacements: [id, desde, hasta], type: QueryTypes.SELECT }
     );
 

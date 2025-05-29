@@ -1,0 +1,16 @@
+service: api
+
+plugins:
+  - serverless-offline
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+
+functions:
+  main:
+    handler: dist/server.handler
+    events:
+      - httpApi:
+          path: /{proxy+}
+          method: ANY

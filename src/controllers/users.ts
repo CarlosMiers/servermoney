@@ -42,31 +42,34 @@ export const newUser = async (req: Request, res: Response) => {
 
 
 export const loginUser = async (req: Request, res: Response) => {
-
-    const { loginacceso, password } = req.body;
-
+    const {
+        loginacceso,
+        password
+    } = req.body;
     //validamos si el usuario existe en la base de datos
-    const login: any = await UserModel.findOne({ where: { loginacceso: loginacceso } });
-    if (!login) {
+    const user: any = await UserModel.findOne({
+        where: {
+            loginacceso: loginacceso
+        }
+    });
+    if (!user) {
         return res.status(400).json({
             msg: `No existe un Usuario con el nombre ${loginacceso}`
         })
     }
-
     //validamos si el password es válido
-    const passwordValid = await bcrypt.compare(password, login.password)
-    console.log(passwordValid)
+    const passwordValid = await bcrypt.compare(password, user.password)
     if (!passwordValid) {
         return res.status(400).json({
             msg: `Password Incorrecto ${loginacceso}`
         })
     }
-
     //generamos el token
-
     const token = jwt.sign({
         loginacceso: loginacceso
     }, config.secretkey)
-    res.json(token);
-
+    res.json({
+        token,
+        userId: user.idusuario
+    });
 }    

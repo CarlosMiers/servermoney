@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import config from "../config/varenv";
 import { UserModel } from '../models/usuarios';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 export const getUsuarios = async (req: Request, res: Response) => {

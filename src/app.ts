@@ -3,6 +3,7 @@ import cors from "cors";
 import config from "./config/varenv";
 import routesUsuarios from "./routes/users";
 import routesClientes from "./routes/clientes";
+import routesCajas from "./routes/cajas";
 import routesProductos from "./routes/productos";
 import routesPreventa from "./routes/preventa";
 
@@ -22,9 +23,16 @@ app.use(express.json({
 
 const basepath: string = config.basepath;
 
+console.log(`Basepath: ${basepath}`);
+
 app.use(`/${basepath}/v1/users`, routesUsuarios);
+
 app.use(`/${basepath}/v1/cliente`, routesClientes);
 app.use(`/${basepath}/v1/cliente/id`, routesClientes);
+
+app.use(`/${basepath}/v1/caja`, routesCajas);
+app.use(`/${basepath}/v1/caja/id`, routesCajas);
+
 app.use(`/${basepath}/v1/producto`, routesProductos);
 app.use(`/${basepath}/v1/producto/id`, routesProductos);
 app.use(`/${basepath}/v1/preventa`, routesPreventa);

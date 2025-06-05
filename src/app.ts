@@ -6,6 +6,7 @@ import routesClientes from "./routes/clientes";
 import routesCajas from "./routes/cajas";
 import routesProductos from "./routes/productos";
 import routesPreventa from "./routes/preventa";
+import routesVentas from "./routes/ventas";
 
 const app: Application = express();
 
@@ -38,6 +39,12 @@ app.use(`/${basepath}/v1/producto/id`, routesProductos);
 app.use(`/${basepath}/v1/preventa`, routesPreventa);
 app.use(`/${basepath}/v1/preventa/id`, routesPreventa);
 app.use(`/${basepath}/v1/preventa-listado`, routesPreventa);
+
+app.use(`/${basepath}/v1/ventas`, routesVentas);
+app.use(`/${basepath}/v1/ventas/id`, routesVentas);
+app.use(`/${basepath}/v1/ventas-listado`, routesVentas);
+
+
 
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error('Unhandled error:', err);

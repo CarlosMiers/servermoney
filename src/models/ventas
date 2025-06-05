@@ -96,6 +96,11 @@ export const VentasModel = sequelize.define("ventas", {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
+    idusuario: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+
 });
 
 VentasModel.belongsTo(ClienteModel, { foreignKey: "cliente" });

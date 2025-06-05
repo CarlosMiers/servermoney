@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import { PreventaModel } from "../models/preventa";
-import { DetallePreventaModel } from "../models/detalle_preventa";
 import { QueryTypes } from "sequelize";
 import sequelize from "../db/connection";
+import { PreventaModel } from "../models/preventa";
+import { DetallePreventaModel } from "../models/detalle_preventa";
 import { ProductosModel } from "../models/productos";
 import { ClienteModel } from "../models/clientes";
 

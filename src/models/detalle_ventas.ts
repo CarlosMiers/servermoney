@@ -45,5 +45,5 @@ DetalleVentasModel.belongsTo(ProductosModel, {
 
 ProductosModel.hasMany(DetalleVentasModel, {
   foreignKey: "codprod",
-  as: "detalles",
+  as: "detalle_ventas",
 });

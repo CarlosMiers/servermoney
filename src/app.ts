@@ -36,6 +36,7 @@ app.use(`/${basepath}/v1/caja/id`, routesCajas);
 
 app.use(`/${basepath}/v1/producto`, routesProductos);
 app.use(`/${basepath}/v1/producto/id`, routesProductos);
+
 app.use(`/${basepath}/v1/preventa`, routesPreventa);
 app.use(`/${basepath}/v1/preventa/id`, routesPreventa);
 app.use(`/${basepath}/v1/preventa-listado`, routesPreventa);

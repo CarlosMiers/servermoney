@@ -61,11 +61,14 @@ PreventaModel.init(
 );
 
 // Relaciones
+
+
 PreventaModel.hasMany(DetallePreventaModel, {
   foreignKey: "iddetalle",
   sourceKey: "numero",
-  as: "detalles",
+  as: "detalles_preventa", // 👈 nombre único
 });
+
 
 DetallePreventaModel.belongsTo(PreventaModel, {
   foreignKey: "iddetalle",

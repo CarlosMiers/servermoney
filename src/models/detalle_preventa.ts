@@ -15,6 +15,7 @@ export const DetallePreventaModel = sequelize.define('detalle_preventas', {
   porcentaje: { type: DataTypes.DECIMAL(5, 2), allowNull: true }
 })
 
+
 DetallePreventaModel.belongsTo(ProductosModel, {
   foreignKey: "codprod",  // 🔧 Este es el campo en detalle que apunta a productos
   targetKey: "codigo",    // 🔧 Este es el campo en productos
@@ -23,5 +24,7 @@ DetallePreventaModel.belongsTo(ProductosModel, {
 // ProductoModel
 ProductosModel.hasMany(DetallePreventaModel, {
   foreignKey: "codprod",
-  as: "detalles",
+  as: "detalle_preventa",
 });
+
+

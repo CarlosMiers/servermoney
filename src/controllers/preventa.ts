@@ -112,7 +112,7 @@ export const getByNumero = async (req: Request, res: Response) => {
       include: [
         {
           model: DetallePreventaModel,
-          as: "detalles",
+          as: "detalles_preventa",
           include: [
             {
               model: ProductosModel,
@@ -144,8 +144,9 @@ export const getByNumero = async (req: Request, res: Response) => {
       clientenombre: preventaJson.cliente_info?.nombrecliente || '',
       totalneto: preventaJson.totalneto,
       codusuario: preventaJson.codusuario,
-      detalles: preventaJson.detalles,
+      detalles: preventaJson.detalles_preventa,
     });
+
   } catch (error) {
     console.error("Error al obtener la preventa:", error);
     res.status(500).json({ message: "Error al obtener la preventa", error });

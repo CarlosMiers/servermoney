@@ -11,18 +11,16 @@ export const NewCaja = async (req: Request, res: Response) => {
 
     // Enviar una respuesta de éxito
     res.status(201).json({
-      msg: 'La Caja fue agregada con éxito',
-      caja: nuevaCaja
+      msg: "La Caja fue agregada con éxito",
+      caja: nuevaCaja,
     });
-
   } catch (error) {
     console.log(error);
     res.status(500).json({
-      msg: 'Ups, ocurrió un error, comuníquese con soporte'
+      msg: "Ups, ocurrió un error, comuníquese con soporte",
     });
   }
-}
-
+};
 
 export const getIdCaja = async (req: Request, res: Response) => {
   const { codigo } = req.body;
@@ -37,8 +35,7 @@ export const getIdCaja = async (req: Request, res: Response) => {
     });
   }
   res.json(caja);
-}
-
+};
 
 export const getTodosAbecedario = async (req: Request, res: Response) => {
   try {
@@ -73,9 +70,7 @@ export const getTodosAbecedario = async (req: Request, res: Response) => {
     console.error(err);
     res.status(500).json({ error: "No se pudo conectar" });
   }
-}
-
-
+};
 
 export const getTodosPaginado = async (req: Request, res: Response) => {
   try {
@@ -92,21 +87,21 @@ export const getTodosPaginado = async (req: Request, res: Response) => {
   } catch (err) {
     res.status(500).json({ error: "NO SE PUDO CONECTAR" });
   }
-}
-
+};
 
 export const getTodos = async (req: Request, res: Response) => {
   try {
     const cajas = await CajasModel.findAll({
       where: { estado: 1 },
-      attributes: ['codigo', 'nombre', 'expedicion', 'factura']
+      attributes: ["codigo", "nombre", "expedicion", "factura"],
     });
 
     res.json(cajas);
   } catch (err) {
     res.status(500).json({ error: "NO SE PUDO CONECTAR" });
   }
-}
+};
+
 export const UpdateCajas = async (req: Request, res: Response) => {
   const codigo = req.body.codigo;
   try {
@@ -114,23 +109,59 @@ export const UpdateCajas = async (req: Request, res: Response) => {
     if (cajas) {
       await cajas.update(req.body);
       res.json({
-        msg: 'La Caja fue actualizada con éxito'
-      })
-
+        msg: "La Caja fue actualizada con éxito",
+      });
     } else {
       res.status(404).json({
-        msg: `No existe la Caja con id ${codigo}`
-      })
+        msg: `No existe la Caja con id ${codigo}`,
+      });
     }
-
   } catch (error) {
     console.log(error);
     res.json({
-      msg: `Upps ocurrio un error, comuniquese con soporte`
-    })
+      msg: `Upps ocurrio un error, comuniquese con soporte`,
+    });
   }
-
-
-
-
 }
+
+// Nueva función para actualizar solo el campo 'factura' de una caja
+export const UpdateCajaFactura = async (req: Request, res: Response) => {
+  const { codigo } = req.body; // Suponemos que el código es enviado en el body
+
+  try {
+    // Buscar la caja por el código
+    const cajas = await CajasModel.findByPk(codigo?.toString());
+
+    if (cajas) {
+      // Obtener el valor actual de 'factura'
+      // Sumamos 1 al valor de factura
+      // Obtener el valor actual de 'factura' y convertirlo a número
+      const facturaActual = parseInt(cajas.getDataValue("factura"), 10);
+
+      if (isNaN(facturaActual)) {
+        // Si la factura actual no es un número válido, devolver error
+        return res.status(400).json({
+          msg: "El valor de la factura no es válido.",
+        });
+      }
+
+      // Sumamos 1 al valor de factura
+      const nuevaFactura = facturaActual + 1;
+      // Actualizamos el valor de 'factura'
+      await cajas.update({ factura: nuevaFactura });
+
+      res.json({
+        msg: `La factura fue actualizada con éxito. Nueva factura: ${nuevaFactura}`,
+      });
+    } else {
+      res.status(404).json({
+        msg: `No existe la caja con id ${codigo}`,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      msg: "Upps ocurrió un error, comuníquese con soporte",
+    });
+  }
+};

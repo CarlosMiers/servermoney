@@ -45,8 +45,7 @@ export const create = async (req: Request, res: Response) => {
 export const update = async (req: Request, res: Response) => {
   const { id } = req.params;
   const numero = parseFloat(id);
-  console.log("número:", numero);
-
+  
   const { fecha, comprobante, cliente, totalneto, codusuario, detalles } =
     req.body;
 

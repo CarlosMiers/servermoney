@@ -44,6 +44,7 @@ interface VentasCreationAttributes extends Optional<VentasModel, "idventa"> {}
 
 VentasModel.init(
   {
+    
     idventa: {
       type: DataTypes.INTEGER,
       primaryKey: true,
@@ -148,7 +149,7 @@ VentasModel.init(
   {
     sequelize,
     modelName: "ventas",
-    tableName: "ventas",
+    tableName: "cabecera_ventas",
     timestamps: false,
   }
 );
@@ -156,7 +157,7 @@ VentasModel.init(
 // Relaciones
 
 VentasModel.hasMany(DetalleVentasModel, {
-  foreignKey: "venta_id",
+  foreignKey: "idventadet",
   sourceKey: "idventa",
   as: "detalles_venta", // 👈 nombre único diferente
 });

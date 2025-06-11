@@ -3,6 +3,10 @@ import sequelize from "../db/connection";
 import { ProductosModel } from './productos';
 export const DetalleVentasModel = sequelize.define("detalle_ventas", {
 
+  item: { type: DataTypes.FLOAT,
+       primaryKey: true,
+        autoIncrement: true },
+   
   idventadet: {
     type: DataTypes.INTEGER,
   },

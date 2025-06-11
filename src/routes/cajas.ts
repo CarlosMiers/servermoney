@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { UpdateCajas, getTodos, getIdCaja, NewCaja, getTodosPaginado } from '../controllers/cajas';
+import { UpdateCajas, getTodos, getIdCaja, NewCaja, getTodosPaginado, UpdateCajaFactura } from '../controllers/cajas';
 import validateToken from './validate-token';
 
 const router = Router();
@@ -9,5 +9,7 @@ router.post('/id', validateToken, getIdCaja);
 router.post('/', validateToken, NewCaja);
 router.get('/', validateToken, getTodosPaginado);
 router.get('/', validateToken, getTodos);
+router.get('/', validateToken, getTodos);
+router.put("/update-factura", validateToken,UpdateCajaFactura);
 
 export default router;

@@ -2,6 +2,11 @@ import { DataTypes } from "sequelize";
 import sequelize from "../db/connection";
 
 export const ConfigModel = sequelize.define("configuracion", {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
   empresa: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -38,4 +43,7 @@ export const ConfigModel = sequelize.define("configuracion", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+}, {
+  tableName: "configuracion", // 👈 Evita que Sequelize invente "configuracions"
+  timestamps: true // ✅ Agrega los campos `createdAt` y `updatedAt`
 });

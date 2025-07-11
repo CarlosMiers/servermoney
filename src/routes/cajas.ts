@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { UpdateCajas, getTodos, getIdCaja, NewCaja, getTodosPaginado, UpdateCajaFactura } from '../controllers/cajas';
+import { UpdateCajas, getTodos, getIdCaja, NewCaja, getTodosPaginado, UpdateCajaFactura,UpdateCajaImpresora } from '../controllers/cajas';
 import validateToken from './validate-token';
 
 const router = Router();
@@ -11,5 +11,6 @@ router.get('/', validateToken, getTodosPaginado);
 router.get('/', validateToken, getTodos);
 router.get('/', validateToken, getTodos);
 router.put("/update-factura", validateToken,UpdateCajaFactura);
+router.put("/update-impresora", validateToken,UpdateCajaImpresora);
 
 export default router;

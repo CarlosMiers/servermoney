@@ -122,7 +122,7 @@ export const UpdateCajas = async (req: Request, res: Response) => {
       msg: `Upps ocurrio un error, comuniquese con soporte`,
     });
   }
-}
+};
 
 // Nueva función para actualizar solo el campo 'factura' de una caja
 export const UpdateCajaFactura = async (req: Request, res: Response) => {
@@ -152,6 +152,40 @@ export const UpdateCajaFactura = async (req: Request, res: Response) => {
 
       res.json({
         msg: `La factura fue actualizada con éxito. Nueva factura: ${nuevaFactura}`,
+      });
+    } else {
+      res.status(404).json({
+        msg: `No existe la caja con id ${codigo}`,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      msg: "Upps ocurrió un error, comuníquese con soporte",
+    });
+  }
+};
+
+//ACTUALIZAMOS EL TIPO DE IMPRESORA
+export const UpdateCajaImpresora = async (req: Request, res: Response) => {
+  const { codigo } = req.body; // Suponemos que el código es enviado en el body
+
+  try {
+    // Buscar la caja por el código
+    const cajas = await CajasModel.findByPk(codigo?.toString());
+
+    if (cajas) {
+      // Obtener el valor actual de 'factura'
+      // Sumamos 1 al valor de factura
+      // Obtener el valor actual de 'factura' y convertirlo a número
+      const impresora = cajas.getDataValue("impresorafactura");
+
+      // Sumamos 1 al valor de factura
+      // Actualizamos el valor de 'factura'
+      await cajas.update({ impresoracaja: impresora });
+
+      res.json({
+        msg: `La Impresora actualizada con éxito. Nueva Impresora: ${impresora}`,
       });
     } else {
       res.status(404).json({

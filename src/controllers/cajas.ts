@@ -168,32 +168,29 @@ export const UpdateCajaFactura = async (req: Request, res: Response) => {
 
 //ACTUALIZAMOS EL TIPO DE IMPRESORA
 export const UpdateCajaImpresora = async (req: Request, res: Response) => {
-  const { codigo } = req.body; // Suponemos que el código es enviado en el body
+  const { codigo, impresoracaja } = req.body;
 
   try {
-    // Buscar la caja por el código
     const cajas = await CajasModel.findByPk(codigo?.toString());
 
     if (cajas) {
-      // Obtener el valor actual de 'factura'
-      // Sumamos 1 al valor de factura
-      // Obtener el valor actual de 'factura' y convertirlo a número
-      const impresora = cajas.getDataValue("impresorafactura");
+      console.log(`✅ Caja encontrada. Datos actuales:`, cajas.toJSON());
 
-      // Sumamos 1 al valor de factura
-      // Actualizamos el valor de 'factura'
-      await cajas.update({ impresoracaja: impresora });
+      const result = await cajas.update({ impresoracaja });
+
+      console.log(`📦 Registro actualizado:`, result.toJSON());
 
       res.json({
-        msg: `La Impresora actualizada con éxito. Nueva Impresora: ${impresora}`,
+        msg: `La impresora fue actualizada con éxito. Nueva MAC: ${impresoracaja}`,
       });
     } else {
+      console.warn(`⚠️ No se encontró la caja con ID ${codigo}`);
       res.status(404).json({
         msg: `No existe la caja con id ${codigo}`,
       });
     }
   } catch (error) {
-    console.log(error);
+    console.error(`❌ Error durante la actualización de la impresora:`, error);
     res.status(500).json({
       msg: "Upps ocurrió un error, comuníquese con soporte",
     });

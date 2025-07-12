@@ -9,7 +9,6 @@ router.post('/id', validateToken, getIdCaja);
 router.post('/', validateToken, NewCaja);
 router.get('/', validateToken, getTodosPaginado);
 router.get('/', validateToken, getTodos);
-router.get('/', validateToken, getTodos);
 router.put("/update-factura", validateToken,UpdateCajaFactura);
 router.put("/update-impresora", validateToken,UpdateCajaImpresora);
 

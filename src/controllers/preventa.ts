@@ -8,12 +8,12 @@ import { ClienteModel } from "../models/clientes";
 
 // Crear una nueva preventa con detalles
 export const create = async (req: Request, res: Response) => {
-  const { fecha, comprobante, cliente, totalneto, codusuario, detalles } =
+  const { fecha,vencimiento,comprobante, cliente, totalneto, codusuario, detalles } =
     req.body;
 
   try {
     const preventa = await PreventaModel.create(
-      { fecha, comprobante, cliente, codusuario, totalneto },
+      { fecha,vencimiento,comprobante, cliente, codusuario, totalneto },
       { returning: true }
     );
     // Crear cada detalle con el número de preventa
@@ -46,9 +46,10 @@ export const update = async (req: Request, res: Response) => {
   const { id } = req.params;
   const numero = parseFloat(id);
   
-  const { fecha, comprobante, cliente, totalneto, codusuario, detalles } =
+  const { fecha,vencimiento, comprobante, cliente, totalneto, codusuario, detalles } =
     req.body;
 
+ 
   try {
     // Buscar la preventa existente por su número
     const preventa = await PreventaModel.findOne({
@@ -61,6 +62,7 @@ export const update = async (req: Request, res: Response) => {
 
     // Actualizar los datos de la preventa
     preventa.fecha = fecha;
+    preventa.vencimiento = vencimiento;
     preventa.comprobante = comprobante;
     preventa.cliente = cliente;
     preventa.totalneto = totalneto;
@@ -138,6 +140,7 @@ export const getByNumero = async (req: Request, res: Response) => {
     res.status(200).json({
       numero: preventaJson.numero,
       fecha: preventaJson.fecha,
+      vencimiento: preventaJson.vencimiento,
       comprobante: preventaJson.comprobante,
       cliente: preventaJson.cliente,
       clientenombre: preventaJson.cliente_info?.nombrecliente || '',
@@ -160,7 +163,7 @@ export const getListadoPreventa = async (req: Request, res: Response) => {
 
   try {
     const listapreventa = await sequelize.query(
-      "SELECT numero, fecha, c.nombre AS nombrecliente, totalneto " +
+      "SELECT numero, fecha,vencimiento,c.nombre AS nombrecliente, totalneto " +
       "FROM preventa p " +
       " LEFT JOIN clientes c " +
       " ON c.codigo = p.cliente " +

@@ -8,6 +8,7 @@ import { ClienteModel } from "./clientes";
 export class PreventaModel extends Model {
   public numero!: number;
   public fecha!: Date;
+  public vencimiento!: Date;
   public comprobante!: number;
   public cliente!: number; // FK a Clientes
   public totalneto!: number;
@@ -22,7 +23,8 @@ export class PreventaModel extends Model {
   };
 }
 
-interface PreventaCreationAttributes extends Optional<PreventaModel, "numero"> { }
+interface PreventaCreationAttributes
+  extends Optional<PreventaModel, "numero"> {}
 
 PreventaModel.init(
   {
@@ -32,6 +34,10 @@ PreventaModel.init(
       autoIncrement: true,
     },
     fecha: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    vencimiento: {
       type: DataTypes.DATE,
       allowNull: false,
     },
@@ -62,13 +68,11 @@ PreventaModel.init(
 
 // Relaciones
 
-
 PreventaModel.hasMany(DetallePreventaModel, {
   foreignKey: "iddetalle",
   sourceKey: "numero",
   as: "detalles_preventa", // 👈 nombre único
 });
-
 
 DetallePreventaModel.belongsTo(PreventaModel, {
   foreignKey: "iddetalle",
@@ -87,5 +91,3 @@ ClienteModel.hasMany(PreventaModel, {
   sourceKey: "codigo",
   as: "preventas",
 });
-
-

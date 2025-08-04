@@ -5,6 +5,12 @@ import { VentasModel } from "../models/ventas";
 import { DetalleVentasModel } from "../models/detalle_ventas";
 import { ProductosModel } from "../models/productos";
 import { ClienteModel } from "../models/clientes";
+import {
+  crearCuentaCliente,
+  eliminarCuentaCliente,
+  modificarCuentaCliente,
+} from "./cuenta_clientes";
+import { CuentaClientesModel } from "../models/cuenta_clientes";
 
 export const getListadoVentas = async (req: Request, res: Response) => {
   const id = req.query.id;
@@ -121,6 +127,8 @@ export const createVenta01 = async (req: Request, res: Response) => {
   }
 };
 
+//Crear una venta con detalles y cuenta cliente
+// Esta función crea una venta y sus detalles, y también crea una cuenta cliente si es necesario
 export const createVenta = async (req: Request, res: Response) => {
   const {
     creferencia,
@@ -224,7 +232,33 @@ export const createVenta = async (req: Request, res: Response) => {
     // Guardar detalles de venta en la base de datos
     await DetalleVentasModel.bulkCreate(detallesConNumero, { transaction });
 
+    // Crear cuenta cliente si es necesario
+    // Solo crear cuenta corriente si comprobante indica documento que genera saldo
+    if (comprobante > 1) {
+      await crearCuentaCliente(
+        {
+          idventa: venta.getDataValue("idventa"),
+          iddocumento: venta.getDataValue("creferencia"), // Opcional: adaptar al código real de documento
+          creferencia: venta.getDataValue("creferencia"),
+          documento: venta.getDataValue("factura"),
+          fecha: venta.getDataValue("fecha"),
+          vencimiento: venta.getDataValue("vencimiento"),
+          cliente: venta.getDataValue("cliente"),
+          sucursal: venta.getDataValue("sucursal"),
+          moneda: venta.getDataValue("moneda"),
+          vendedor: venta.getDataValue("vendedor"),
+          caja: venta.getDataValue("caja"),
+          importe: venta.getDataValue("totalneto"),
+          numerocuota: 1,
+          cuota: 1,
+          saldo: venta.getDataValue("totalneto"), // Asumimos que el saldo inicial es igual al importe total de la venta,
+        },
+        transaction
+      );
+    }
+
     // Commit de la transacción si todo fue exitoso
+
     await transaction.commit();
 
     // Enviar respuesta exitosa con el número de factura generado
@@ -437,9 +471,36 @@ export const updateVenta = async (req: Request, res: Response) => {
     });
 
     await DetalleVentasModel.bulkCreate(nuevosDetalles, { transaction });
+    await eliminarCuentaCliente(idventa, transaction);
+    if (comprobante > 1) {
+      const cuentaExistente = await CuentaClientesModel.findOne({
+        where: { idventa },
+        transaction,
+      });
+
+      await crearCuentaCliente(
+        {
+          idventa: venta.getDataValue("idventa"),
+          iddocumento: venta.getDataValue("creferencia"), // Opcional: adaptar al código real de documento
+          creferencia: venta.getDataValue("creferencia"),
+          documento: venta.getDataValue("factura"),
+          fecha: venta.getDataValue("fecha"),
+          vencimiento: venta.getDataValue("vencimiento"),
+          cliente: venta.getDataValue("cliente"),
+          sucursal: venta.getDataValue("sucursal"),
+          moneda: venta.getDataValue("moneda"),
+          vendedor: venta.getDataValue("vendedor"),
+          caja: venta.getDataValue("caja"),
+          importe: venta.getDataValue("totalneto"),
+          numerocuota: 1,
+          cuota: 1,
+          saldo: venta.getDataValue("totalneto"), // Asumimos que el saldo inicial es igual al importe total de la venta,
+        },
+        transaction
+      );
+    }
 
     await transaction.commit();
-
     res.status(200).json({
       message: "Factura actualizada correctamente",
       formatofactura: venta.getDataValue("formatofactura"),

@@ -9,6 +9,7 @@ import routesProductos from "./routes/productos";
 import routesPreventa from "./routes/preventa";
 import routesVentas from "./routes/ventas";
 import routesConfig from "./routes/config";
+import routesCobranzas from "./routes/cobranzas";
 
 const app: Application = express();
 
@@ -46,6 +47,8 @@ app.use(`/${basepath}/v1/preventa-listado`, routesPreventa);
 app.use(`/${basepath}/v1/ventas`, routesVentas);
 app.use(`/${basepath}/v1/ventas/id`, routesVentas);
 app.use(`/${basepath}/v1/ventas-listado`, routesVentas);
+app.use(`/${basepath}/v1/cobranzas-listado`, routesCobranzas);
+
 
 // ❌ Manejo de errores globales
 

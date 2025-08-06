@@ -8,7 +8,6 @@ import { ClienteModel } from "../models/clientes";
 import {
   crearCuentaCliente,
   eliminarCuentaCliente,
-  modificarCuentaCliente,
 } from "./cuenta_clientes";
 import { CuentaClientesModel } from "../models/cuenta_clientes";
 

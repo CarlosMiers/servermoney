@@ -9,6 +9,7 @@ export interface CuentaClienteAttributes {
   documento: number;
   fecha: Date;
   vencimiento: Date;
+  comprobante: number
   cliente: string;
   sucursal: number;
   moneda: number;
@@ -54,6 +55,9 @@ export const CuentaClientesModel = sequelize.define(
     },
     cliente: {
       type: DataTypes.STRING,
+    },
+    comprobante: {
+      type: DataTypes.INTEGER,
     },
     sucursal: {
       type: DataTypes.INTEGER,

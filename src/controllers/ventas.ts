@@ -5,11 +5,9 @@ import { VentasModel } from "../models/ventas";
 import { DetalleVentasModel } from "../models/detalle_ventas";
 import { ProductosModel } from "../models/productos";
 import { ClienteModel } from "../models/clientes";
-import {
-  crearCuentaCliente,
-  eliminarCuentaCliente,
-} from "./cuenta_clientes";
+import { crearCuentaCliente, eliminarCuentaCliente } from "./cuenta_clientes";
 import { CuentaClientesModel } from "../models/cuenta_clientes";
+import { registrarAuditoria } from "../helpers/auditoria";
 
 export const getListadoVentas = async (req: Request, res: Response) => {
   const id = req.query.id;
@@ -265,6 +263,16 @@ export const createVenta = async (req: Request, res: Response) => {
       formatofactura: venta.getDataValue("formatofactura"),
       message: "Se Generó Factura N° " + venta.getDataValue("formatofactura"),
     });
+
+    await registrarAuditoria({
+      req,
+      usuario: idusuario,
+      accion: "crear",
+      modulo: "Venta",
+      idregistro: Number(venta.getDataValue("idventa")),
+      datosDespues: { ...req.body },
+    });
+
   } catch (error) {
     // Rollback de la transacción en caso de error
     await transaction.rollback();
@@ -379,13 +387,15 @@ export const updateVenta = async (req: Request, res: Response) => {
     detalles,
   } = req.body;
 
+  // 1. Validar datos requeridos
   if (
     !idventa ||
     !creferencia ||
     !fecha ||
     !factura ||
     !detalles ||
-    detalles.length === 0
+    detalles.length === 0 ||
+    !idusuario // Es buena práctica validar también el usuario para la auditoría
   ) {
     return res.status(400).json({ message: "Faltan datos requeridos" });
   }
@@ -393,14 +403,14 @@ export const updateVenta = async (req: Request, res: Response) => {
   const transaction = await sequelize.transaction();
 
   try {
-    // Buscar la venta existente
-    const venta = await VentasModel.findByPk(idventa);
+    // 2. Buscar la venta existente
+    const venta = await VentasModel.findByPk(idventa, { transaction });
     if (!venta) {
       await transaction.rollback();
       return res.status(404).json({ message: "Venta no encontrada" });
     }
 
-    // Actualizar datos de la venta
+    // 3. Actualizar datos de la venta
     await venta.update(
       {
         creferencia,
@@ -431,13 +441,13 @@ export const updateVenta = async (req: Request, res: Response) => {
       { transaction }
     );
 
-    // Eliminar detalles anteriores
+    // 4. Eliminar detalles anteriores de forma transaccional
     await DetalleVentasModel.destroy({
-      where: { idventadet: idventa },
+      where: { idventadet: idventa }, // Asumimos que `idventadet` es la clave foránea a `Ventas`
       transaction,
     });
 
-    // Crear nuevos detalles
+    // 5. Crear nuevos detalles de forma transaccional
     const nuevosDetalles = detalles.map((detalle: any) => {
       const cantidad = parseFloat(detalle.cantidad) || 0;
       const precio = parseFloat(detalle.precio) || 0;
@@ -470,17 +480,18 @@ export const updateVenta = async (req: Request, res: Response) => {
     });
 
     await DetalleVentasModel.bulkCreate(nuevosDetalles, { transaction });
-    await eliminarCuentaCliente(idventa, transaction);
-    if (comprobante > 1) {
-      const cuentaExistente = await CuentaClientesModel.findOne({
-        where: { idventa },
-        transaction,
-      });
 
+    // 6. Eliminar la cuenta del cliente anterior y crear una nueva si aplica
+    // Esta es la parte corregida: se ejecuta solo si el comprobante lo requiere
+    if (comprobante > 1) {
+      // Elimina la cuenta existente antes de crear la nueva
+      await eliminarCuentaCliente(idventa, transaction);
+      
+      // Crea la nueva cuenta
       await crearCuentaCliente(
         {
           idventa: venta.getDataValue("idventa"),
-          iddocumento: venta.getDataValue("creferencia"), // Opcional: adaptar al código real de documento
+          iddocumento: venta.getDataValue("creferencia"),
           creferencia: venta.getDataValue("creferencia"),
           documento: venta.getDataValue("factura"),
           fecha: venta.getDataValue("fecha"),
@@ -493,18 +504,32 @@ export const updateVenta = async (req: Request, res: Response) => {
           importe: venta.getDataValue("totalneto"),
           numerocuota: 1,
           cuota: 1,
-          saldo: venta.getDataValue("totalneto"), // Asumimos que el saldo inicial es igual al importe total de la venta,
+          saldo: venta.getDataValue("totalneto"),
         },
         transaction
       );
     }
 
+    // 7. Si todo es correcto, hacer commit de la transacción
     await transaction.commit();
     res.status(200).json({
       message: "Factura actualizada correctamente",
       formatofactura: venta.getDataValue("formatofactura"),
     });
+
+    // 8. Registrar la auditoría fuera de la transacción para evitar problemas
+    await registrarAuditoria({
+      req,
+      usuario: idusuario,
+      accion: "modificación",
+      modulo: "Venta",
+      idregistro: Number(venta.getDataValue("idventa")),
+      datosDespues: { ...req.body },
+    });
+
+
   } catch (error) {
+    // En caso de error, hacer rollback de la transacción
     await transaction.rollback();
     console.error("Error al actualizar venta:", error);
     res.status(500).json({

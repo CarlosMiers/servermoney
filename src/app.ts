@@ -10,7 +10,7 @@ import routesPreventa from "./routes/preventa";
 import routesVentas from "./routes/ventas";
 import routesConfig from "./routes/config";
 import routesCobranzas from "./routes/cobranzas";
-
+import routesCuentaClientes from "./routes/cuenta_clientes";
 const app: Application = express();
 
 // ✅ Configuración de CORS completamente abierta
@@ -48,7 +48,9 @@ app.use(`/${basepath}/v1/ventas`, routesVentas);
 app.use(`/${basepath}/v1/ventas/id`, routesVentas);
 app.use(`/${basepath}/v1/ventas-listado`, routesVentas);
 app.use(`/${basepath}/v1/cobranzas-listado`, routesCobranzas);
-
+app.use(`/${basepath}/v1/cobranzas`, routesCobranzas);
+app.use(`/${basepath}/v1/cobranzas/id`, routesCobranzas);
+app.use(`/${basepath}/v1/cuenta-clientes`, routesCuentaClientes);
 
 // ❌ Manejo de errores globales
 

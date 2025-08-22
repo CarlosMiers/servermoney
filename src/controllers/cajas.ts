@@ -196,3 +196,45 @@ export const UpdateCajaImpresora = async (req: Request, res: Response) => {
     });
   }
 };
+
+
+export const UpdateCajaRecibo = async (req: Request, res: Response) => {
+  const { codigo } = req.body; // Suponemos que el código es enviado en el body
+
+  try {
+    // Buscar la caja por el código
+    const cajas = await CajasModel.findByPk(codigo?.toString());
+
+    if (cajas) {
+      // Obtener el valor actual de 'factura'
+      // Sumamos 1 al valor de factura
+      // Obtener el valor actual de 'factura' y convertirlo a número
+      const reciboActual = parseInt(cajas.getDataValue("recibo"), 10);
+
+      if (isNaN(reciboActual)) {
+        // Si la factura actual no es un número válido, devolver error
+        return res.status(400).json({
+          msg: "El valor del Recibo no es válido.",
+        });
+      }
+
+      // Sumamos 1 al valor de factura
+      const nuevoRecibo = reciboActual + 1;
+      // Actualizamos el valor de 'factura'
+      await cajas.update({ recibo: nuevoRecibo });
+
+      res.json({
+        msg: `El Recibo fue actualizado con éxito. Nueva Recibo: ${nuevoRecibo}`,
+      });
+    } else {
+      res.status(404).json({
+        msg: `No existe la caja con id ${codigo}`,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      msg: "Upps ocurrió un error, comuníquese con soporte",
+    });
+  }
+};

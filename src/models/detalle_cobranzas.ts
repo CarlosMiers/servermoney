@@ -85,6 +85,10 @@ export const DetalleCobranzaModel = sequelize.define(
       type: DataTypes.DECIMAL,
       allowNull: true,
     },
+    fechacobro: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
   },
   {
     tableName: "detalle_cobranzas", // 👈 Evita que Sequelize invente "configuracions"

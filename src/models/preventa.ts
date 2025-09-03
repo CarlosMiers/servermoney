@@ -29,7 +29,7 @@ interface PreventaCreationAttributes
 PreventaModel.init(
   {
     numero: {
-      type: DataTypes.NUMBER,
+      type: DataTypes.FLOAT,
       primaryKey: true,
       autoIncrement: true,
     },
@@ -52,7 +52,7 @@ PreventaModel.init(
 
     cierre: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
 
     totalneto: {

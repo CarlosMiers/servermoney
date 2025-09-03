@@ -8,7 +8,10 @@ import { ClienteModel } from "../models/clientes";
 import { crearCuentaCliente, eliminarCuentaCliente } from "./cuenta_clientes";
 import { CuentaClientesModel } from "../models/cuenta_clientes";
 import { registrarAuditoria } from "../helpers/auditoria";
+import { PreventaModel } from "../models/preventa";
 
+
+// Obtener listado de ventas con nombre de cliente
 export const getListadoVentas = async (req: Request, res: Response) => {
   const id = req.query.id;
   const desde = req.query.fechainicio;
@@ -33,96 +36,6 @@ export const getListadoVentas = async (req: Request, res: Response) => {
   }
 };
 
-export const createVenta01 = async (req: Request, res: Response) => {
-  const {
-    creferencia,
-    fecha,
-    factura,
-    formatofactura,
-    vencimiento,
-    cliente,
-    sucursal,
-    camion,
-    moneda,
-    comprobante,
-    cotizacion,
-    vendedor,
-    caja,
-    supago,
-    sucambio,
-    exentas,
-    gravadas10,
-    gravadas5,
-    totalneto,
-    iniciovencetimbrado,
-    vencimientotimbrado,
-    nrotimbrado,
-    idusuario,
-    detalles,
-  } = req.body;
-
-  try {
-    const venta = await VentasModel.create(
-      {
-        creferencia,
-        fecha,
-        factura,
-        formatofactura,
-        vencimiento,
-        cliente,
-        sucursal,
-        camion,
-        moneda,
-        comprobante,
-        cotizacion,
-        vendedor,
-        caja,
-        supago,
-        sucambio,
-        exentas,
-        gravadas10,
-        gravadas5,
-        totalneto,
-        iniciovencetimbrado,
-        vencimientotimbrado,
-        nrotimbrado,
-        idusuario,
-      },
-      { returning: true }
-    );
-    // Crear cada detalle con el número de preventa
-
-    const detallesConNumero = detalles.map((detalle: any) => {
-      const monto = parseFloat(detalle.precio) * parseInt(detalle.cantidad); // Asumir que 'monto' es precio * cantidad
-      let importeiva = 0;
-      if (detalle.porcentaje === 5) {
-        importeiva = Math.ceil(monto / 21);
-      } else if (detalle.porcentaje === 10) {
-        importeiva = Math.ceil(monto / 11);
-      }
-      return {
-        idventadet: venta.getDataValue("idventa"),
-        dreferencia: venta.getDataValue("creferencia"),
-        codprod: detalle.codprod,
-        cantidad: detalle.cantidad,
-        prcosto: parseFloat(detalle.costo), // Convertir a número decimal
-        precio: parseFloat(detalle.precio), // Convertir a número decimal
-        monto: parseFloat(detalle.precio) * parseInt(detalle.cantidad), // Asumir que 'monto' es precio * cantidad
-        porcentaje: detalle.porcentaje,
-        impiva: importeiva,
-        suc: venta.getDataValue("sucursal"),
-      };
-    });
-    await DetalleVentasModel.bulkCreate(detallesConNumero);
-
-    res.status(200).json({
-      formatofactura: venta.getDataValue("formatofactura"),
-      message: "Se Generó Factura N° " + venta.getDataValue("formatofactura"),
-    });
-  } catch (error) {
-    res.status(500).json({ message: "Error al crear Factura", error });
-  }
-};
 
 //Crear una venta con detalles y cuenta cliente
 // Esta función crea una venta y sus detalles, y también crea una cuenta cliente si es necesario
@@ -138,6 +51,7 @@ export const createVenta = async (req: Request, res: Response) => {
     camion,
     moneda,
     comprobante,
+    preventa,
     cotizacion,
     vendedor,
     caja,
@@ -154,7 +68,8 @@ export const createVenta = async (req: Request, res: Response) => {
     idusuario,
     detalles,
   } = req.body;
-  // Validación preliminar de los datos (reemplazar con validaciones reales según el caso).
+
+  // Validación preliminar de los datos
   if (
     !creferencia ||
     !fecha ||
@@ -162,14 +77,18 @@ export const createVenta = async (req: Request, res: Response) => {
     !detalles ||
     detalles.length === 0
   ) {
+    console.error("Faltan datos requeridos para crear la venta.");
     return res.status(400).json({ message: "Faltan datos requeridos" });
   }
 
-  // Crear una transacción para garantizar consistencia en la base de datos
+  // Convertir el campo preventa a número y verificar si es válido
+  const numeroPreventa = Number(preventa);
+
+  // Crear una transacción para garantizar la consistencia de los datos
   const transaction = await sequelize.transaction();
 
   try {
-    // Crear la venta
+    // 1. Crear la venta dentro de la transacción
     const venta = await VentasModel.create(
       {
         creferencia,
@@ -182,12 +101,13 @@ export const createVenta = async (req: Request, res: Response) => {
         camion,
         moneda,
         comprobante,
+        preventa: numeroPreventa, // Usar el valor numérico
         cotizacion,
         vendedor,
         caja,
         supago,
         sucambio,
-        cuotas, // Aseguramos que 'cuotas' sea un campo opcional si no se usa
+        cuotas,
         exentas,
         gravadas10,
         gravadas5,
@@ -197,27 +117,28 @@ export const createVenta = async (req: Request, res: Response) => {
         nrotimbrado,
         idusuario,
       },
-      { transaction, returning: true } // Aseguramos que el `idventa` se devuelva.
+      { transaction, returning: true }
     );
 
-    // Crear cada detalle con el número de preventa
+    // 2. Mapear y crear los detalles de la venta
     const detallesConNumero = detalles.map((detalle: any) => {
-      const monto = parseFloat(detalle.precio) * parseInt(detalle.cantidad, 10); // Aseguramos que 'cantidad' sea un número entero
-
-      // Calcular impuesto IVA según el porcentaje (suponiendo que son 5% o 10%).
+      const monto = parseFloat(detalle.precio) * parseInt(detalle.cantidad, 10);
       let impiva = 0;
       if (detalle.porcentaje === 5) {
-        impiva = Math.ceil(monto / 21); // IVA 5%
+        impiva = Math.ceil(monto / 21);
       } else if (detalle.porcentaje === 10) {
-        impiva = Math.ceil(monto / 11); // IVA 10%
+        impiva = Math.ceil(monto / 11);
       }
+
+      const costo = parseFloat(detalle.costo);
+      const prcosto = isNaN(costo) ? 0 : costo;
 
       return {
         idventadet: venta.getDataValue("idventa"),
         dreferencia: venta.getDataValue("creferencia"),
         codprod: detalle.codprod,
         cantidad: parseInt(detalle.cantidad, 10),
-        prcosto: parseFloat(detalle.costo),
+        prcosto: prcosto,
         precio: parseFloat(detalle.precio),
         monto,
         porcentaje: detalle.porcentaje,
@@ -226,16 +147,14 @@ export const createVenta = async (req: Request, res: Response) => {
       };
     });
 
-    // Guardar detalles de venta en la base de datos
     await DetalleVentasModel.bulkCreate(detallesConNumero, { transaction });
 
-    // Crear cuenta cliente si es necesario
-    // Solo crear cuenta corriente si comprobante indica documento que genera saldo
+    // 3. Crear cuenta de cliente si es necesario
     if (comprobante > 1) {
       await crearCuentaCliente(
         {
           idventa: venta.getDataValue("idventa"),
-          iddocumento: venta.getDataValue("creferencia"), // Opcional: adaptar al código real de documento
+          iddocumento: venta.getDataValue("creferencia"),
           creferencia: venta.getDataValue("creferencia"),
           documento: venta.getDataValue("factura"),
           fecha: venta.getDataValue("fecha"),
@@ -248,22 +167,36 @@ export const createVenta = async (req: Request, res: Response) => {
           importe: venta.getDataValue("totalneto"),
           numerocuota: 1,
           cuota: 1,
-          saldo: venta.getDataValue("totalneto"), // Asumimos que el saldo inicial es igual al importe total de la venta,
+          saldo: venta.getDataValue("totalneto"),
         },
         transaction
       );
     }
+    
+    // 4. Si la venta proviene de una preventa (preventa > 0), actualizar el estado de la misma
+    if (numeroPreventa > 0) {
+      // Revertir a la búsqueda directa con el valor original
+      const [filasAfectadas] = await PreventaModel.update(
+        { cierre: 1 },
+        {
+          where: { numero: preventa }, // <-- Uso del valor original sin conversión explícita
+          transaction,
+        }
+      );
 
-    // Commit de la transacción si todo fue exitoso
+      // Confirmar si la actualización tuvo éxito
+      if (filasAfectadas > 0) {
+        console.log(`✅ Cierre de preventa actualizado con éxito para el número ${preventa}. Filas afectadas: ${filasAfectadas}`);
+      } else {
+        console.log(`⚠️ Advertencia: No se encontró la preventa con número ${preventa} o el campo "cierre" ya tenía el valor 1.`);
+      }
+    }
 
+    // 5. Commit de la transacción si todas las operaciones fueron exitosas
     await transaction.commit();
+    console.log("✅ Transacción completada y venta creada.");
 
-    // Enviar respuesta exitosa con el número de factura generado
-    res.status(200).json({
-      formatofactura: venta.getDataValue("formatofactura"),
-      message: "Se Generó Factura N° " + venta.getDataValue("formatofactura"),
-    });
-
+    // 6. Registrar la auditoría después del commit
     await registrarAuditoria({
       req,
       usuario: idusuario,
@@ -273,19 +206,26 @@ export const createVenta = async (req: Request, res: Response) => {
       datosDespues: { ...req.body },
     });
 
+    // 7. Enviar la respuesta exitosa
+    res.status(200).json({
+      formatofactura: venta.getDataValue("formatofactura"),
+      message: "Se Generó Factura N° " + venta.getDataValue("formatofactura"),
+    });
+
   } catch (error) {
-    // Rollback de la transacción en caso de error
+    // Si algo falla, hacer rollback de la transacción
     await transaction.rollback();
+    console.error("❌ Transacción revertida debido a un error.");
 
-    // Registrar el error para depuración
+    // Registrar el error y enviar una respuesta de error
     console.error("Error al crear venta:", error);
-
     res.status(500).json({
       message: "Error al crear Factura",
       error: error instanceof Error ? error.message : error,
     });
   }
 };
+
 
 // Obtener venta con sus detalles
 export const getByFactura = async (req: Request, res: Response) => {
@@ -329,6 +269,7 @@ export const getByFactura = async (req: Request, res: Response) => {
       creferencia: ventaJson.creferencia,
       vencimiento: ventaJson.vencimiento,
       sucursal: ventaJson.sucursal,
+      preventa: ventaJson.preventa,
       camion: ventaJson.camion,
       moneda: ventaJson.moneda,
       cotizacion: ventaJson.cotizacion,
@@ -357,9 +298,11 @@ export const getByFactura = async (req: Request, res: Response) => {
   }
 };
 
+
+// Actualizar una venta existente con detalles y cuenta cliente
 export const updateVenta = async (req: Request, res: Response) => {
   const {
-    idventa, // Necesitamos este campo para identificar qué venta actualizar
+    idventa,
     creferencia,
     fecha,
     factura,
@@ -370,6 +313,7 @@ export const updateVenta = async (req: Request, res: Response) => {
     camion,
     moneda,
     comprobante,
+    preventa, // Agrega el campo preventa
     cotizacion,
     vendedor,
     caja,
@@ -395,7 +339,7 @@ export const updateVenta = async (req: Request, res: Response) => {
     !factura ||
     !detalles ||
     detalles.length === 0 ||
-    !idusuario // Es buena práctica validar también el usuario para la auditoría
+    !idusuario
   ) {
     return res.status(400).json({ message: "Faltan datos requeridos" });
   }
@@ -403,133 +347,90 @@ export const updateVenta = async (req: Request, res: Response) => {
   const transaction = await sequelize.transaction();
 
   try {
-    // 2. Buscar la venta existente
+    // 2. Buscar la venta existente y los datos de la preventa
     const venta = await VentasModel.findByPk(idventa, { transaction });
     if (!venta) {
       await transaction.rollback();
       return res.status(404).json({ message: "Venta no encontrada" });
     }
 
+    const datosAntes = venta.get({ plain: true });
+
     // 3. Actualizar datos de la venta
     await venta.update(
       {
-        creferencia,
-        fecha,
-        factura,
-        formatofactura,
-        vencimiento,
-        cliente,
-        sucursal,
-        camion,
-        moneda,
-        comprobante,
-        cotizacion,
-        vendedor,
-        caja,
-        supago,
-        sucambio,
-        cuotas,
-        exentas,
-        gravadas10,
-        gravadas5,
-        totalneto,
-        iniciovencetimbrado,
-        vencimientotimbrado,
-        nrotimbrado,
-        idusuario,
+        creferencia, fecha, factura, formatofactura, vencimiento, cliente, sucursal, camion, moneda, comprobante,
+        cotizacion, vendedor, caja, supago, sucambio, cuotas, exentas, gravadas10, gravadas5,
+        totalneto, iniciovencetimbrado, vencimientotimbrado, nrotimbrado, idusuario, preventa
       },
       { transaction }
     );
 
-    // 4. Eliminar detalles anteriores de forma transaccional
-    await DetalleVentasModel.destroy({
-      where: { idventadet: idventa }, // Asumimos que `idventadet` es la clave foránea a `Ventas`
-      transaction,
-    });
-
-    // 5. Crear nuevos detalles de forma transaccional
+    // 4. Actualizar detalles de venta (eliminar y recrear)
+    await DetalleVentasModel.destroy({ where: { idventadet: idventa }, transaction });
     const nuevosDetalles = detalles.map((detalle: any) => {
       const cantidad = parseFloat(detalle.cantidad) || 0;
       const precio = parseFloat(detalle.precio) || 0;
-      const costo = parseFloat(detalle.costo || detalle.prcosto) || 0;
-      const porcentaje = parseFloat(
-        detalle.porcentaje || detalle.ivaporcentaje || 0
-      );
-
+      const costo = parseFloat(detalle.costo);
+      const prcosto = isNaN(costo) ? 0 : costo;
+      const porcentaje = parseFloat(detalle.porcentaje || detalle.ivaporcentaje || 0);
       const monto = cantidad * precio;
-
-      let impiva = 0;
-      if (porcentaje === 5) {
-        impiva = Math.ceil(monto / 21);
-      } else if (porcentaje === 10) {
-        impiva = Math.ceil(monto / 11);
-      }
-
+      let impiva = (porcentaje === 5) ? Math.ceil(monto / 21) : (porcentaje === 10) ? Math.ceil(monto / 11) : 0;
+      
       return {
-        idventadet: idventa,
-        dreferencia: creferencia,
-        codprod: detalle.codprod,
-        cantidad,
-        prcosto: costo,
-        precio,
-        monto,
-        porcentaje,
-        impiva,
-        suc: sucursal,
+        idventadet: idventa, dreferencia: creferencia, codprod: detalle.codprod, cantidad, prcosto: prcosto,
+        precio, monto, porcentaje, impiva, suc: sucursal
       };
     });
-
     await DetalleVentasModel.bulkCreate(nuevosDetalles, { transaction });
 
-    // 6. Eliminar la cuenta del cliente anterior y crear una nueva si aplica
-    // Esta es la parte corregida: se ejecuta solo si el comprobante lo requiere
+    // 5. Actualizar cuenta de cliente si aplica
     if (comprobante > 1) {
-      // Elimina la cuenta existente antes de crear la nueva
       await eliminarCuentaCliente(idventa, transaction);
-      
-      // Crea la nueva cuenta
       await crearCuentaCliente(
-        {
-          idventa: venta.getDataValue("idventa"),
-          iddocumento: venta.getDataValue("creferencia"),
-          creferencia: venta.getDataValue("creferencia"),
-          documento: venta.getDataValue("factura"),
-          fecha: venta.getDataValue("fecha"),
-          vencimiento: venta.getDataValue("vencimiento"),
-          cliente: venta.getDataValue("cliente"),
-          sucursal: venta.getDataValue("sucursal"),
-          moneda: venta.getDataValue("moneda"),
-          vendedor: venta.getDataValue("vendedor"),
-          caja: venta.getDataValue("caja"),
-          importe: venta.getDataValue("totalneto"),
-          numerocuota: 1,
-          cuota: 1,
-          saldo: venta.getDataValue("totalneto"),
-        },
+        { idventa, iddocumento: creferencia, creferencia, documento: factura, fecha, vencimiento, cliente,
+          sucursal, moneda, vendedor, caja, importe: totalneto, numerocuota: 1, cuota: 1, saldo: totalneto },
         transaction
       );
     }
 
-    // 7. Si todo es correcto, hacer commit de la transacción
-    await transaction.commit();
-    res.status(200).json({
-      message: "Factura actualizada correctamente",
-      formatofactura: venta.getDataValue("formatofactura"),
-    });
+    // 6. Actualizar el estado de cierre de la preventa si se especifica
+    const preventaAnterior = datosAntes.preventa;
+    // Si la preventa ha cambiado, actualizar el estado de cierre
+    if (preventa !== preventaAnterior) {
+      // Revertir el cierre de la preventa anterior (si existía)
+      if (preventaAnterior && preventaAnterior > 0) {
+        const prevAnterior = await PreventaModel.findOne({ where: { numero: preventaAnterior }, transaction });
+        if (prevAnterior) {
+          await prevAnterior.update({ cierre: 0 }, { transaction });
+          console.log(`✅ Cierre de preventa revertido para el número ${preventaAnterior}`);
+        }
+      }
+      // Actualizar el cierre de la nueva preventa (si existe y es válida)
+      if (preventa && preventa > 0) {
+        const prevNueva = await PreventaModel.findOne({ where: { numero: preventa }, transaction });
+        if (prevNueva) {
+          await prevNueva.update({ cierre: 1 }, { transaction });
+          console.log(`✅ Cierre de preventa actualizado para el número ${preventa}`);
+        }
+      }
+    }
 
-    // 8. Registrar la auditoría fuera de la transacción para evitar problemas
+    // 7. Commit de la transacción
+    await transaction.commit();
+    res.status(200).json({ message: "Factura actualizada correctamente", formatofactura: venta.getDataValue("formatofactura") });
+
+    // 8. Registrar la auditoría después del commit
     await registrarAuditoria({
       req,
       usuario: idusuario,
       accion: "modificación",
       modulo: "Venta",
       idregistro: Number(venta.getDataValue("idventa")),
+      datosAntes,
       datosDespues: { ...req.body },
     });
-
-
   } catch (error) {
-    // En caso de error, hacer rollback de la transacción
     await transaction.rollback();
     console.error("Error al actualizar venta:", error);
     res.status(500).json({

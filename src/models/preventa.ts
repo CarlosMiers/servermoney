@@ -6,7 +6,7 @@ import { ClienteModel } from "./clientes";
 
 // Definir la clase PreventaModel extendiendo de Model
 export class PreventaModel extends Model {
-  public numero!: number;
+  public numero!: number; // Clave primaria
   public fecha!: Date;
   public vencimiento!: Date;
   public comprobante!: number;
@@ -29,7 +29,7 @@ interface PreventaCreationAttributes
 PreventaModel.init(
   {
     numero: {
-      type: DataTypes.FLOAT,
+      type: DataTypes.NUMBER,
       primaryKey: true,
       autoIncrement: true,
     },
@@ -49,6 +49,12 @@ PreventaModel.init(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+
+    cierre: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+
     totalneto: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,

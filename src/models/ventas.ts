@@ -17,6 +17,7 @@ export class VentasModel extends Model {
   public moneda!: number;
   public comprobante!: number;
   public cotizacion!: number;
+  public preventa!: number;
   public vendedor!: number;
   public camion!: number;
   public caja!: number;
@@ -84,6 +85,10 @@ VentasModel.init(
     comprobante: {
       type: DataTypes.INTEGER,
       allowNull: false,
+    },
+    preventa : {
+      type: DataTypes.NUMBER,
+      allowNull: true,
     },
     cotizacion: {
       type: DataTypes.FLOAT,
